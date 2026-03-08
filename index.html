@@ -1,0 +1,1024 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <meta name="theme-color" content="#1a0a0a" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <meta name="apple-mobile-web-app-title" content="ShieldHer" />
+  <title>ShieldHer — Women Safety App</title>
+  <link rel="manifest" href="manifest.json" />
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --red: #ff2d55;
+      --red-dark: #c0142e;
+      --red-glow: rgba(255,45,85,0.35);
+      --bg: #0f0709;
+      --surface: #1c0d11;
+      --surface2: #2a1218;
+      --gold: #f5c842;
+      --text: #f8eef1;
+      --muted: #9b7a82;
+      --safe: #30d158;
+      --safe-dark: #1a8a38;
+    }
+
+    * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: 'DM Sans', sans-serif;
+      min-height: 100vh;
+      overflow-x: hidden;
+      position: relative;
+    }
+
+    body::before {
+      content: '';
+      position: fixed;
+      top: -200px; left: 50%;
+      transform: translateX(-50%);
+      width: 600px; height: 400px;
+      background: radial-gradient(ellipse, rgba(255,45,85,0.08) 0%, transparent 70%);
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    /* SCREENS */
+    .screen { display: none; min-height: 100vh; flex-direction: column; position: relative; z-index: 1; }
+    .screen.active { display: flex; }
+
+    /* ======= SPLASH ======= */
+    #splash {
+      align-items: center;
+      justify-content: center;
+      background: var(--bg);
+    }
+    .splash-logo {
+      display: flex; flex-direction: column; align-items: center; gap: 16px;
+      animation: fadeUp 0.8s ease forwards;
+    }
+    .shield-icon {
+      width: 90px; height: 90px;
+      background: linear-gradient(135deg, var(--red), #ff6b8a);
+      border-radius: 50% 50% 50% 50% / 60% 60% 40% 40%;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 40px;
+      box-shadow: 0 0 60px var(--red-glow), 0 0 120px rgba(255,45,85,0.15);
+      animation: pulse-shield 2s ease-in-out infinite;
+    }
+    @keyframes pulse-shield {
+      0%, 100% { box-shadow: 0 0 60px var(--red-glow), 0 0 120px rgba(255,45,85,0.15); }
+      50% { box-shadow: 0 0 80px rgba(255,45,85,0.5), 0 0 150px rgba(255,45,85,0.2); }
+    }
+    .app-name {
+      font-family: 'Playfair Display', serif;
+      font-size: 42px; font-weight: 900;
+      letter-spacing: -1px;
+      background: linear-gradient(135deg, #fff 0%, #ff9fb3 100%);
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+    }
+    .app-tagline { color: var(--muted); font-size: 14px; letter-spacing: 2px; text-transform: uppercase; }
+    .splash-dots { display: flex; gap: 8px; margin-top: 60px; }
+    .dot { width: 8px; height: 8px; border-radius: 50%; background: var(--muted); animation: bounce-dot 1.2s ease infinite; }
+    .dot:nth-child(2) { animation-delay: 0.2s; }
+    .dot:nth-child(3) { animation-delay: 0.4s; }
+    @keyframes bounce-dot { 0%,80%,100%{transform:scale(0.6);opacity:.4} 40%{transform:scale(1);opacity:1;background:var(--red)} }
+
+    /* ======= SETUP ======= */
+    #setup {
+      padding: 60px 28px 40px;
+      animation: fadeUp 0.5s ease;
+    }
+    .setup-header { margin-bottom: 40px; }
+    .setup-header h1 { font-family: 'Playfair Display', serif; font-size: 32px; line-height: 1.2; margin-bottom: 8px; }
+    .setup-header p { color: var(--muted); font-size: 14px; line-height: 1.6; }
+    .step-indicator { display: flex; gap: 6px; margin-bottom: 32px; }
+    .step-dot { height: 4px; border-radius: 2px; background: var(--surface2); flex: 1; transition: background 0.4s; }
+    .step-dot.done { background: var(--red); }
+
+    .field { margin-bottom: 20px; }
+    .field label { display: block; font-size: 12px; letter-spacing: 1.5px; text-transform: uppercase; color: var(--muted); margin-bottom: 8px; }
+    .field input {
+      width: 100%;
+      background: var(--surface);
+      border: 1.5px solid rgba(255,255,255,0.08);
+      border-radius: 12px;
+      padding: 14px 16px;
+      color: var(--text);
+      font-family: 'DM Sans', sans-serif;
+      font-size: 16px;
+      outline: none;
+      transition: border-color 0.3s, box-shadow 0.3s;
+    }
+    .field input:focus {
+      border-color: var(--red);
+      box-shadow: 0 0 0 3px rgba(255,45,85,0.15);
+    }
+    .field input::placeholder { color: var(--muted); }
+
+    .contact-list { display: flex; flex-direction: column; gap: 12px; margin-bottom: 20px; }
+    .contact-item {
+      background: var(--surface);
+      border-radius: 12px;
+      padding: 14px 16px;
+      display: flex; align-items: center; gap: 12px;
+      border: 1.5px solid rgba(255,255,255,0.06);
+      animation: fadeUp 0.3s ease;
+    }
+    .contact-avatar {
+      width: 38px; height: 38px; border-radius: 50%;
+      background: linear-gradient(135deg, var(--red), #ff8fa3);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 16px; font-weight: 700; flex-shrink: 0;
+    }
+    .contact-info { flex: 1; }
+    .contact-name { font-weight: 600; font-size: 15px; }
+    .contact-phone { font-size: 12px; color: var(--muted); }
+    .contact-remove {
+      background: none; border: none; color: var(--muted);
+      font-size: 20px; cursor: pointer; padding: 4px;
+      transition: color 0.2s;
+    }
+    .contact-remove:hover { color: var(--red); }
+
+    .add-contact-row { display: flex; gap: 10px; }
+    .add-contact-row .field { flex: 1; margin-bottom: 0; }
+
+    /* BUTTONS */
+    .btn {
+      width: 100%; border: none; border-radius: 14px;
+      padding: 16px; font-family: 'DM Sans', sans-serif;
+      font-size: 16px; font-weight: 600; cursor: pointer;
+      transition: all 0.2s; letter-spacing: 0.3px;
+    }
+    .btn-primary {
+      background: linear-gradient(135deg, var(--red), #ff6b8a);
+      color: #fff;
+      box-shadow: 0 4px 24px rgba(255,45,85,0.3);
+    }
+    .btn-primary:active { transform: scale(0.97); }
+    .btn-ghost {
+      background: var(--surface); color: var(--text);
+      border: 1.5px solid rgba(255,255,255,0.1);
+    }
+    .btn-icon {
+      width: auto; padding: 12px 16px;
+      background: var(--red);
+      color: white; border-radius: 12px;
+      border: none; font-size: 20px; cursor: pointer;
+      flex-shrink: 0; transition: all 0.2s;
+    }
+    .btn-icon:active { transform: scale(0.9); }
+
+    /* ======= HOME ======= */
+    #home { padding: 0; }
+
+    .home-header {
+      padding: 56px 28px 24px;
+      display: flex; align-items: center; justify-content: space-between;
+    }
+    .home-greeting { }
+    .home-greeting .name-tag {
+      font-size: 12px; letter-spacing: 2px; text-transform: uppercase;
+      color: var(--muted); margin-bottom: 4px;
+    }
+    .home-greeting h2 {
+      font-family: 'Playfair Display', serif;
+      font-size: 26px; font-weight: 700;
+    }
+    .settings-btn {
+      width: 44px; height: 44px; border-radius: 50%;
+      background: var(--surface); border: 1.5px solid rgba(255,255,255,0.08);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 20px; cursor: pointer; transition: all 0.2s;
+    }
+    .settings-btn:active { transform: scale(0.9); }
+
+    /* STATUS CARD */
+    .status-card {
+      margin: 0 20px 24px;
+      background: var(--surface);
+      border-radius: 18px;
+      padding: 16px 20px;
+      display: flex; align-items: center; gap: 12px;
+      border: 1.5px solid rgba(255,255,255,0.06);
+    }
+    .status-dot {
+      width: 10px; height: 10px; border-radius: 50%;
+      background: var(--safe);
+      box-shadow: 0 0 10px var(--safe);
+      animation: blink 2s ease infinite;
+      flex-shrink: 0;
+    }
+    @keyframes blink { 0%,100%{opacity:1} 50%{opacity:0.4} }
+    .status-text { font-size: 14px; color: var(--muted); }
+    .status-text strong { color: var(--text); }
+
+    /* SOS SECTION */
+    .sos-section {
+      display: flex; flex-direction: column; align-items: center;
+      padding: 16px 28px 28px;
+    }
+    .sos-label {
+      font-size: 11px; letter-spacing: 3px; text-transform: uppercase;
+      color: var(--muted); margin-bottom: 32px;
+    }
+
+    .sos-ring {
+      position: relative;
+      display: flex; align-items: center; justify-content: center;
+      margin-bottom: 28px;
+    }
+    .sos-ring::before, .sos-ring::after {
+      content: '';
+      position: absolute;
+      border-radius: 50%;
+      border: 2px solid rgba(255,45,85,0.2);
+      animation: ring-expand 2.5s ease-out infinite;
+    }
+    .sos-ring::before { width: 220px; height: 220px; }
+    .sos-ring::after { width: 260px; height: 260px; animation-delay: 0.8s; }
+    @keyframes ring-expand {
+      0% { transform: scale(0.85); opacity: 0.5; }
+      100% { transform: scale(1.1); opacity: 0; }
+    }
+
+    .sos-btn {
+      width: 175px; height: 175px;
+      border-radius: 50%;
+      background: radial-gradient(circle at 35% 35%, #ff6b8a, var(--red-dark));
+      border: none;
+      display: flex; flex-direction: column; align-items: center; justify-content: center;
+      gap: 6px;
+      cursor: pointer;
+      box-shadow:
+        0 0 0 6px rgba(255,45,85,0.12),
+        0 0 0 14px rgba(255,45,85,0.06),
+        0 20px 60px rgba(255,45,85,0.4),
+        inset 0 1px 0 rgba(255,255,255,0.2);
+      transition: all 0.15s;
+      position: relative; z-index: 2;
+      -webkit-user-select: none; user-select: none;
+    }
+    .sos-btn:active {
+      transform: scale(0.94);
+      box-shadow: 0 0 0 10px rgba(255,45,85,0.2), 0 10px 40px rgba(255,45,85,0.6);
+    }
+    .sos-btn-icon { font-size: 38px; line-height: 1; }
+    .sos-btn-text {
+      font-family: 'Playfair Display', serif;
+      font-size: 28px; font-weight: 900;
+      color: #fff; letter-spacing: 1px;
+    }
+    .sos-btn-sub { font-size: 11px; color: rgba(255,255,255,0.7); letter-spacing: 1px; }
+    .sos-hint { font-size: 12px; color: var(--muted); text-align: center; line-height: 1.6; }
+
+    /* QUICK ACTIONS */
+    .quick-actions {
+      padding: 0 20px 20px;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+    }
+    .action-card {
+      background: var(--surface);
+      border-radius: 16px;
+      padding: 18px 16px;
+      border: 1.5px solid rgba(255,255,255,0.06);
+      cursor: pointer;
+      transition: all 0.2s;
+      display: flex; flex-direction: column; gap: 10px;
+      -webkit-user-select: none; user-select: none;
+    }
+    .action-card:active { transform: scale(0.97); border-color: var(--red); }
+    .action-icon { font-size: 26px; }
+    .action-title { font-weight: 600; font-size: 14px; }
+    .action-desc { font-size: 12px; color: var(--muted); line-height: 1.4; }
+    .action-card.highlight {
+      background: linear-gradient(135deg, rgba(48,209,88,0.12), rgba(48,209,88,0.05));
+      border-color: rgba(48,209,88,0.2);
+    }
+
+    /* BOTTOM NAV */
+    .bottom-nav {
+      margin-top: auto;
+      background: var(--surface);
+      border-top: 1px solid rgba(255,255,255,0.06);
+      display: flex;
+      padding: 12px 0 24px;
+    }
+    .nav-item {
+      flex: 1; display: flex; flex-direction: column; align-items: center; gap: 4px;
+      cursor: pointer; padding: 8px; transition: color 0.2s;
+      color: var(--muted); font-size: 11px;
+    }
+    .nav-item.active { color: var(--red); }
+    .nav-icon { font-size: 22px; }
+
+    /* ======= SOS MODAL ======= */
+    .modal-overlay {
+      position: fixed; inset: 0; z-index: 100;
+      background: rgba(0,0,0,0.85);
+      backdrop-filter: blur(8px);
+      display: none; align-items: flex-end; justify-content: center;
+      padding: 0;
+    }
+    .modal-overlay.active { display: flex; animation: fadeIn 0.25s ease; }
+    @keyframes fadeIn { from{opacity:0} to{opacity:1} }
+
+    .modal {
+      background: var(--surface);
+      border-radius: 24px 24px 0 0;
+      padding: 28px 24px 48px;
+      width: 100%; max-width: 480px;
+      animation: slideUp 0.35s cubic-bezier(0.34, 1.56, 0.64, 1);
+      border-top: 1px solid rgba(255,255,255,0.1);
+      max-height: 85vh;
+      overflow-y: auto;
+    }
+    @keyframes slideUp { from{transform:translateY(100%)} to{transform:translateY(0)} }
+    .modal-handle { width: 40px; height: 4px; background: rgba(255,255,255,0.15); border-radius: 2px; margin: 0 auto 24px; }
+    .modal-title {
+      font-family: 'Playfair Display', serif;
+      font-size: 24px; font-weight: 700; margin-bottom: 6px;
+    }
+    .modal-subtitle { color: var(--muted); font-size: 13px; margin-bottom: 24px; }
+
+    .emergency-numbers { display: flex; flex-direction: column; gap: 10px; margin-bottom: 24px; }
+    .emergency-item {
+      background: var(--surface2);
+      border-radius: 14px;
+      padding: 14px 16px;
+      display: flex; align-items: center; gap: 14px;
+      border: 1px solid rgba(255,255,255,0.06);
+      cursor: pointer; transition: all 0.2s;
+      text-decoration: none; color: inherit;
+    }
+    .emergency-item:active { transform: scale(0.97); background: rgba(255,45,85,0.1); border-color: var(--red); }
+    .emergency-badge {
+      background: var(--red);
+      color: white;
+      border-radius: 10px;
+      padding: 4px 10px;
+      font-size: 13px; font-weight: 700;
+      flex-shrink: 0;
+    }
+    .emergency-info { flex: 1; }
+    .emergency-name { font-weight: 600; font-size: 15px; }
+    .emergency-desc { font-size: 12px; color: var(--muted); margin-top: 2px; }
+    .call-arrow { font-size: 20px; color: var(--red); }
+
+    .my-contacts-title {
+      font-size: 11px; letter-spacing: 2px; text-transform: uppercase;
+      color: var(--muted); margin-bottom: 12px;
+    }
+    .my-contact-item {
+      background: rgba(255,45,85,0.08);
+      border: 1px solid rgba(255,45,85,0.2);
+      border-radius: 14px;
+      padding: 14px 16px;
+      display: flex; align-items: center; gap: 12px;
+      cursor: pointer; transition: all 0.2s;
+      text-decoration: none; color: inherit;
+      margin-bottom: 10px;
+    }
+    .my-contact-item:active { transform: scale(0.97); }
+
+    /* LOCATION MODAL */
+    .location-status {
+      text-align: center; padding: 32px 20px;
+    }
+    .location-icon { font-size: 60px; margin-bottom: 16px; }
+    .location-msg { font-size: 16px; font-weight: 600; margin-bottom: 8px; }
+    .location-sub { font-size: 13px; color: var(--muted); line-height: 1.6; }
+
+    /* FAKE CALL */
+    .fake-call-screen {
+      position: fixed; inset: 0; z-index: 200;
+      background: linear-gradient(180deg, #0a2a1a 0%, #061a10 100%);
+      display: none; flex-direction: column; align-items: center;
+      padding: 80px 28px 60px;
+      animation: fadeIn 0.3s ease;
+    }
+    .fake-call-screen.active { display: flex; }
+    .fake-caller { font-size: 13px; letter-spacing: 2px; text-transform: uppercase; color: rgba(255,255,255,0.5); margin-bottom: 12px; }
+    .fake-name { font-family: 'Playfair Display', serif; font-size: 36px; margin-bottom: 8px; text-align: center; }
+    .fake-status { color: rgba(255,255,255,0.5); font-size: 15px; margin-bottom: 80px; }
+    .fake-avatar {
+      width: 100px; height: 100px; border-radius: 50%;
+      background: linear-gradient(135deg, #2ecc71, #1abc9c);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 48px; margin-bottom: 40px;
+      box-shadow: 0 0 40px rgba(46,204,113,0.4);
+    }
+    .fake-actions { display: flex; gap: 48px; margin-top: auto; }
+    .fake-btn {
+      width: 68px; height: 68px; border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 28px; cursor: pointer; border: none; transition: all 0.2s;
+    }
+    .fake-btn:active { transform: scale(0.9); }
+    .fake-decline { background: #ff3b30; }
+    .fake-accept { background: #30d158; }
+
+    /* CONTACTS PAGE */
+    #contacts-page {
+      padding: 60px 24px 40px;
+      animation: fadeUp 0.3s ease;
+    }
+    #contacts-page h2 {
+      font-family: 'Playfair Display', serif;
+      font-size: 28px; margin-bottom: 6px;
+    }
+    #contacts-page .subtitle { color: var(--muted); font-size: 13px; margin-bottom: 32px; }
+
+    /* TOAST */
+    .toast {
+      position: fixed; bottom: 100px; left: 50%; transform: translateX(-50%);
+      background: var(--surface2);
+      border: 1px solid rgba(255,255,255,0.1);
+      padding: 12px 20px;
+      border-radius: 100px;
+      font-size: 14px; font-weight: 500;
+      z-index: 300;
+      white-space: nowrap;
+      display: none;
+    }
+    .toast.show { display: block; animation: toastAnim 2.5s ease forwards; }
+    @keyframes toastAnim {
+      0%{opacity:0;transform:translateX(-50%) translateY(10px)}
+      15%{opacity:1;transform:translateX(-50%) translateY(0)}
+      80%{opacity:1}
+      100%{opacity:0;transform:translateX(-50%) translateY(-10px)}
+    }
+
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(20px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    /* QR PAGE */
+    #qr-page {
+      padding: 60px 24px 40px;
+      align-items: center;
+      text-align: center;
+    }
+    #qr-page h2 { font-family: 'Playfair Display', serif; font-size: 28px; margin-bottom: 8px; }
+    #qr-page p { color: var(--muted); font-size: 13px; margin-bottom: 32px; line-height: 1.6; }
+    .qr-container {
+      background: white;
+      border-radius: 20px;
+      padding: 20px;
+      margin-bottom: 24px;
+    }
+    .qr-note {
+      background: var(--surface);
+      border-radius: 14px;
+      padding: 16px 20px;
+      font-size: 13px; color: var(--muted);
+      line-height: 1.6;
+      text-align: left;
+      border: 1px solid rgba(255,255,255,0.06);
+    }
+    .qr-note strong { color: var(--text); }
+
+    .chip {
+      display: inline-flex; align-items: center; gap: 6px;
+      background: rgba(255,45,85,0.12);
+      border: 1px solid rgba(255,45,85,0.25);
+      border-radius: 100px;
+      padding: 4px 12px;
+      font-size: 12px; color: var(--red);
+      margin-bottom: 20px;
+    }
+  </style>
+</head>
+<body>
+
+<!-- SPLASH -->
+<div class="screen active" id="splash">
+  <div class="splash-logo">
+    <div class="shield-icon">🛡️</div>
+    <div class="app-name">ShieldHer</div>
+    <div class="app-tagline">Your safety companion</div>
+    <div class="splash-dots">
+      <div class="dot"></div><div class="dot"></div><div class="dot"></div>
+    </div>
+  </div>
+</div>
+
+<!-- SETUP: Step 1 - Your Name -->
+<div class="screen" id="setup-name">
+  <div class="setup-header">
+    <div class="chip">🛡️ Setup · Step 1 of 2</div>
+    <h1>What's your<br/>name?</h1>
+    <p>This will be shown when you share your location with emergency contacts.</p>
+  </div>
+  <div class="step-indicator">
+    <div class="step-dot done"></div>
+    <div class="step-dot"></div>
+  </div>
+  <div class="field">
+    <label>Your Name</label>
+    <input type="text" id="user-name-input" placeholder="e.g. Priya Sharma" />
+  </div>
+  <div class="field">
+    <label>Your Phone Number</label>
+    <input type="tel" id="user-phone-input" placeholder="+91 98765 43210" />
+  </div>
+  <div style="margin-top: auto;">
+    <button class="btn btn-primary" onclick="goToSetupContacts()">Continue →</button>
+  </div>
+</div>
+
+<!-- SETUP: Step 2 - Contacts -->
+<div class="screen" id="setup-contacts">
+  <div class="setup-header">
+    <div class="chip">🛡️ Setup · Step 2 of 2</div>
+    <h1>Add trusted<br/>contacts</h1>
+    <p>These people will receive your live location and SOS alert instantly.</p>
+  </div>
+  <div class="step-indicator">
+    <div class="step-dot done"></div>
+    <div class="step-dot done"></div>
+  </div>
+  <div class="contact-list" id="setup-contact-list"></div>
+  <div class="add-contact-row">
+    <div class="field" style="flex:1.2">
+      <input type="text" id="new-contact-name" placeholder="Contact name" />
+    </div>
+    <div class="field" style="flex:1.5">
+      <input type="tel" id="new-contact-phone" placeholder="Phone number" />
+    </div>
+    <button class="btn-icon" onclick="addContact()">+</button>
+  </div>
+  <div style="margin-top: 24px; display:flex; flex-direction:column; gap:10px;">
+    <button class="btn btn-primary" onclick="finishSetup()">Launch ShieldHer 🛡️</button>
+    <button class="btn btn-ghost" onclick="finishSetup()">Skip for now</button>
+  </div>
+</div>
+
+<!-- HOME -->
+<div class="screen" id="home">
+  <div class="home-header">
+    <div class="home-greeting">
+      <div class="name-tag">Logged in as</div>
+      <h2 id="display-name">Loading...</h2>
+    </div>
+    <div class="settings-btn" onclick="showSettings()">⚙️</div>
+  </div>
+
+  <div class="status-card">
+    <div class="status-dot"></div>
+    <div class="status-text"><strong>ShieldHer is active</strong> · Protection enabled</div>
+  </div>
+
+  <div class="sos-section">
+    <div class="sos-label">Press & hold for SOS</div>
+    <div class="sos-ring">
+      <button class="sos-btn" id="sos-btn" onpointerdown="startSosHold()" onpointerup="cancelSosHold()" onpointerleave="cancelSosHold()">
+        <span class="sos-btn-icon">🆘</span>
+        <span class="sos-btn-text">SOS</span>
+        <span class="sos-btn-sub">Hold 2 sec</span>
+      </button>
+    </div>
+    <div class="sos-hint">Triggers emergency call list<br/>& sends your live location to all contacts</div>
+  </div>
+
+  <div class="quick-actions">
+    <div class="action-card highlight" onclick="shareLocation()">
+      <div class="action-icon">📍</div>
+      <div class="action-title">Share Location</div>
+      <div class="action-desc">Send live location to all trusted contacts now</div>
+    </div>
+    <div class="action-card" onclick="triggerFakeCall()">
+      <div class="action-icon">📞</div>
+      <div class="action-title">Fake Call</div>
+      <div class="action-desc">Simulate incoming call to escape a situation</div>
+    </div>
+    <div class="action-card" onclick="showSafeModal()">
+      <div class="action-icon">✅</div>
+      <div class="action-title">I'm Safe</div>
+      <div class="action-desc">Notify contacts you're okay</div>
+    </div>
+    <div class="action-card" onclick="showQRPage()">
+      <div class="action-icon">📲</div>
+      <div class="action-title">Share App</div>
+      <div class="action-desc">QR code to install on another phone</div>
+    </div>
+  </div>
+
+  <div class="bottom-nav">
+    <div class="nav-item active" onclick="showHome()">
+      <div class="nav-icon">🏠</div>Home
+    </div>
+    <div class="nav-item" onclick="showContacts()">
+      <div class="nav-icon">👥</div>Contacts
+    </div>
+    <div class="nav-item" onclick="showQRPage()">
+      <div class="nav-icon">📲</div>Share
+    </div>
+  </div>
+</div>
+
+<!-- CONTACTS PAGE -->
+<div class="screen" id="contacts-page">
+  <h2>My Contacts</h2>
+  <div class="subtitle">Trusted people who'll receive your SOS alert</div>
+  <div id="contacts-main-list"></div>
+  <div style="margin-top: 20px;">
+    <div class="field"><label>Name</label><input type="text" id="main-contact-name" placeholder="Contact name" /></div>
+    <div class="field"><label>Phone</label><input type="tel" id="main-contact-phone" placeholder="Phone number" /></div>
+    <button class="btn btn-primary" onclick="addMainContact()">Add Contact</button>
+  </div>
+  <div style="margin-top: 16px;">
+    <button class="btn btn-ghost" onclick="showHome()">← Back to Home</button>
+  </div>
+</div>
+
+<!-- QR PAGE -->
+<div class="screen" id="qr-page">
+  <h2>Install ShieldHer</h2>
+  <p>Share this QR code with someone to install the app on their phone. No Play Store needed!</p>
+  <div class="qr-container" id="qr-container"></div>
+  <div class="qr-note">
+    <strong>How it works:</strong><br/>
+    Scan QR → Opens app in browser → Tap "Add to Home Screen" in browser menu → App installed! Works on Android & iPhone without any app store.
+  </div>
+  <div style="margin-top: 20px; width:100%;">
+    <button class="btn btn-ghost" onclick="showHome()">← Back</button>
+  </div>
+</div>
+
+<!-- SOS MODAL -->
+<div class="modal-overlay" id="sos-modal">
+  <div class="modal">
+    <div class="modal-handle"></div>
+    <div class="modal-title">🆘 Emergency Contacts</div>
+    <div class="modal-subtitle">Location sent to your contacts. Call emergency services:</div>
+    <div class="emergency-numbers">
+      <a class="emergency-item" href="tel:112">
+        <div class="emergency-badge">112</div>
+        <div class="emergency-info">
+          <div class="emergency-name">National Emergency</div>
+          <div class="emergency-desc">Police, Ambulance, Fire — all in one</div>
+        </div>
+        <div class="call-arrow">📞</div>
+      </a>
+      <a class="emergency-item" href="tel:1091">
+        <div class="emergency-badge">1091</div>
+        <div class="emergency-info">
+          <div class="emergency-name">Women Helpline</div>
+          <div class="emergency-desc">National women's safety helpline</div>
+        </div>
+        <div class="call-arrow">📞</div>
+      </a>
+      <a class="emergency-item" href="tel:181">
+        <div class="emergency-badge">181</div>
+        <div class="emergency-info">
+          <div class="emergency-name">Abhayam Helpline</div>
+          <div class="emergency-desc">Women in distress (24/7)</div>
+        </div>
+        <div class="call-arrow">📞</div>
+      </a>
+      <a class="emergency-item" href="tel:100">
+        <div class="emergency-badge">100</div>
+        <div class="emergency-info">
+          <div class="emergency-name">Police</div>
+          <div class="emergency-desc">Direct police connection</div>
+        </div>
+        <div class="call-arrow">📞</div>
+      </a>
+      <a class="emergency-item" href="tel:7827170170">
+        <div class="emergency-badge">iCall</div>
+        <div class="emergency-info">
+          <div class="emergency-name">iCall Crisis Line</div>
+          <div class="emergency-desc">Mental health & safety support</div>
+        </div>
+        <div class="call-arrow">📞</div>
+      </a>
+    </div>
+    <div class="my-contacts-title">Your Trusted Contacts</div>
+    <div id="sos-my-contacts"></div>
+    <button class="btn btn-ghost" onclick="closeModal('sos-modal')">Close</button>
+  </div>
+</div>
+
+<!-- LOCATION MODAL -->
+<div class="modal-overlay" id="location-modal">
+  <div class="modal">
+    <div class="modal-handle"></div>
+    <div class="location-status">
+      <div class="location-icon" id="loc-icon">📍</div>
+      <div class="location-msg" id="loc-msg">Getting your location...</div>
+      <div class="location-sub" id="loc-sub">Please allow location access when prompted.</div>
+    </div>
+    <button class="btn btn-ghost" onclick="closeModal('location-modal')" style="margin-top:16px">Close</button>
+  </div>
+</div>
+
+<!-- SAFE MODAL -->
+<div class="modal-overlay" id="safe-modal">
+  <div class="modal">
+    <div class="modal-handle"></div>
+    <div class="location-status">
+      <div class="location-icon">✅</div>
+      <div class="location-msg">I'm Safe!</div>
+      <div class="location-sub">An SMS will be sent to all your trusted contacts letting them know you're safe.</div>
+    </div>
+    <div id="safe-contacts-list" style="margin:16px 0;"></div>
+    <button class="btn btn-primary" onclick="sendSafeMessage()" style="background:linear-gradient(135deg,#30d158,#1a8a38);box-shadow:0 4px 24px rgba(48,209,88,0.3)">Send "I'm Safe" Message</button>
+    <button class="btn btn-ghost" onclick="closeModal('safe-modal')" style="margin-top:10px">Cancel</button>
+  </div>
+</div>
+
+<!-- FAKE CALL -->
+<div class="fake-call-screen" id="fake-call">
+  <div class="fake-caller">Incoming Call</div>
+  <div class="fake-avatar">👩</div>
+  <div class="fake-name" id="fake-caller-name">Mom</div>
+  <div class="fake-status">ShieldHer · Simulated Call</div>
+  <div class="fake-actions">
+    <button class="fake-btn fake-decline" onclick="endFakeCall()">📵</button>
+    <button class="fake-btn fake-accept" onclick="endFakeCall()">📞</button>
+  </div>
+</div>
+
+<!-- TOAST -->
+<div class="toast" id="toast"></div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+<script>
+  // ===== STATE =====
+  let userData = JSON.parse(localStorage.getItem('shieldher_user') || '{}');
+  let contacts = JSON.parse(localStorage.getItem('shieldher_contacts') || '[]');
+  let sosHoldTimer = null;
+  let sosProgress = 0;
+
+  // ===== INIT =====
+  setTimeout(() => {
+    if (userData.name) {
+      showScreen('home');
+      updateHome();
+    } else {
+      showScreen('setup-name');
+    }
+  }, 2200);
+
+  function showScreen(id) {
+    document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+    document.getElementById(id).classList.add('active');
+  }
+
+  // ===== SETUP =====
+  function goToSetupContacts() {
+    const name = document.getElementById('user-name-input').value.trim();
+    const phone = document.getElementById('user-phone-input').value.trim();
+    if (!name) { showToast('⚠️ Please enter your name'); return; }
+    userData = { name, phone };
+    localStorage.setItem('shieldher_user', JSON.stringify(userData));
+    renderSetupContacts();
+    showScreen('setup-contacts');
+  }
+
+  function renderSetupContacts() {
+    const list = document.getElementById('setup-contact-list');
+    list.innerHTML = contacts.map((c, i) => `
+      <div class="contact-item">
+        <div class="contact-avatar">${c.name[0].toUpperCase()}</div>
+        <div class="contact-info">
+          <div class="contact-name">${c.name}</div>
+          <div class="contact-phone">${c.phone}</div>
+        </div>
+        <button class="contact-remove" onclick="removeContact(${i}, true)">✕</button>
+      </div>
+    `).join('');
+  }
+
+  function addContact() {
+    const name = document.getElementById('new-contact-name').value.trim();
+    const phone = document.getElementById('new-contact-phone').value.trim();
+    if (!name || !phone) { showToast('⚠️ Enter both name and number'); return; }
+    contacts.push({ name, phone });
+    localStorage.setItem('shieldher_contacts', JSON.stringify(contacts));
+    document.getElementById('new-contact-name').value = '';
+    document.getElementById('new-contact-phone').value = '';
+    renderSetupContacts();
+    showToast(`✅ ${name} added`);
+  }
+
+  function removeContact(i, isSetup) {
+    contacts.splice(i, 1);
+    localStorage.setItem('shieldher_contacts', JSON.stringify(contacts));
+    if (isSetup) renderSetupContacts(); else renderMainContacts();
+    showToast('Contact removed');
+  }
+
+  function finishSetup() {
+    localStorage.setItem('shieldher_contacts', JSON.stringify(contacts));
+    showScreen('home');
+    updateHome();
+    showToast('🛡️ ShieldHer is ready!');
+  }
+
+  // ===== HOME =====
+  function updateHome() {
+    const data = JSON.parse(localStorage.getItem('shieldher_user') || '{}');
+    document.getElementById('display-name').textContent = data.name || 'User';
+  }
+
+  function showHome() { showScreen('home'); updateHome(); }
+  function showContacts() { showScreen('contacts-page'); renderMainContacts(); }
+  function showSettings() { showScreen('setup-name'); document.getElementById('user-name-input').value = userData.name||''; document.getElementById('user-phone-input').value = userData.phone||''; }
+
+  // ===== SOS HOLD =====
+  function startSosHold() {
+    const btn = document.getElementById('sos-btn');
+    btn.style.transform = 'scale(0.96)';
+    btn.style.boxShadow = '0 0 0 10px rgba(255,45,85,0.25), 0 10px 40px rgba(255,45,85,0.7)';
+    sosHoldTimer = setTimeout(() => {
+      btn.style.transform = '';
+      btn.style.boxShadow = '';
+      triggerSOS();
+    }, 2000);
+  }
+
+  function cancelSosHold() {
+    clearTimeout(sosHoldTimer);
+    const btn = document.getElementById('sos-btn');
+    btn.style.transform = '';
+    btn.style.boxShadow = '';
+  }
+
+  function triggerSOS() {
+    shareLocationSilent();
+    renderSOSContacts();
+    document.getElementById('sos-modal').classList.add('active');
+  }
+
+  function renderSOSContacts() {
+    const el = document.getElementById('sos-my-contacts');
+    const saved = JSON.parse(localStorage.getItem('shieldher_contacts') || '[]');
+    if (!saved.length) { el.innerHTML = '<p style="color:var(--muted);font-size:13px">No trusted contacts saved yet.</p>'; return; }
+    el.innerHTML = saved.map(c => `
+      <a class="my-contact-item" href="tel:${c.phone}">
+        <div class="contact-avatar" style="width:36px;height:36px;font-size:14px">${c.name[0].toUpperCase()}</div>
+        <div class="contact-info">
+          <div class="contact-name">${c.name}</div>
+          <div class="contact-phone">${c.phone}</div>
+        </div>
+        <div style="color:var(--red);font-size:20px">📞</div>
+      </a>
+    `).join('');
+  }
+
+  // ===== LOCATION =====
+  function shareLocation() {
+    document.getElementById('loc-icon').textContent = '📍';
+    document.getElementById('loc-msg').textContent = 'Getting your location...';
+    document.getElementById('loc-sub').textContent = 'Please allow location access when prompted.';
+    document.getElementById('location-modal').classList.add('active');
+    shareLocationSilent(true);
+  }
+
+  function shareLocationSilent(showModal = false) {
+    if (!navigator.geolocation) {
+      if (showModal) updateLocationModal('⚠️', 'Location not supported', 'Your browser does not support location sharing.');
+      return;
+    }
+    navigator.geolocation.getCurrentPosition(pos => {
+      const { latitude: lat, longitude: lng } = pos.coords;
+      const saved = JSON.parse(localStorage.getItem('shieldher_contacts') || '[]');
+      const user = JSON.parse(localStorage.getItem('shieldher_user') || '{}');
+      const mapsLink = `https://maps.google.com/?q=${lat},${lng}`;
+      const msg = encodeURIComponent(`🆘 SOS from ${user.name||'ShieldHer user'}! My current location: ${mapsLink}`);
+
+      if (showModal) {
+        updateLocationModal('✅', 'Location ready!', `Your location link has been prepared. Tap your contact's number after closing SOS to send via SMS.\n\nCoords: ${lat.toFixed(5)}, ${lng.toFixed(5)}`);
+      }
+
+      // Open SMS for first contact if available
+      if (saved.length > 0 && showModal) {
+        const numbers = saved.map(c => c.phone).join(',');
+        setTimeout(() => { window.open(`sms:${numbers}?body=${msg}`); }, 800);
+      }
+    }, err => {
+      if (showModal) updateLocationModal('⚠️', 'Location denied', 'Please enable location permission in your browser settings and try again.');
+    });
+  }
+
+  function updateLocationModal(icon, msg, sub) {
+    document.getElementById('loc-icon').textContent = icon;
+    document.getElementById('loc-msg').textContent = msg;
+    document.getElementById('loc-sub').textContent = sub;
+  }
+
+  // ===== SAFE MESSAGE =====
+  function showSafeModal() {
+    const saved = JSON.parse(localStorage.getItem('shieldher_contacts') || '[]');
+    const el = document.getElementById('safe-contacts-list');
+    if (!saved.length) { el.innerHTML = '<p style="color:var(--muted);font-size:13px;text-align:center">No contacts saved. Add contacts first!</p>'; }
+    else { el.innerHTML = saved.map(c => `<div class="contact-item" style="margin-bottom:10px"><div class="contact-avatar">${c.name[0]}</div><div class="contact-info"><div class="contact-name">${c.name}</div><div class="contact-phone">${c.phone}</div></div></div>`).join(''); }
+    document.getElementById('safe-modal').classList.add('active');
+  }
+
+  function sendSafeMessage() {
+    const saved = JSON.parse(localStorage.getItem('shieldher_contacts') || '[]');
+    const user = JSON.parse(localStorage.getItem('shieldher_user') || '{}');
+    if (!saved.length) { showToast('⚠️ No contacts saved'); return; }
+    const numbers = saved.map(c => c.phone).join(',');
+    const msg = encodeURIComponent(`✅ ${user.name||'ShieldHer user'} is safe now! No need to worry. — Sent via ShieldHer App`);
+    window.open(`sms:${numbers}?body=${msg}`);
+    closeModal('safe-modal');
+    showToast('✅ "I\'m Safe" message sent!');
+  }
+
+  // ===== FAKE CALL =====
+  function triggerFakeCall() {
+    const saved = JSON.parse(localStorage.getItem('shieldher_contacts') || '[]');
+    const callerName = saved.length > 0 ? saved[0].name : 'Mom';
+    document.getElementById('fake-caller-name').textContent = callerName;
+    document.getElementById('fake-call').classList.add('active');
+    // vibrate if supported
+    if (navigator.vibrate) navigator.vibrate([500, 300, 500, 300, 500]);
+  }
+
+  function endFakeCall() {
+    document.getElementById('fake-call').classList.remove('active');
+    if (navigator.vibrate) navigator.vibrate(0);
+  }
+
+  // ===== CONTACTS PAGE =====
+  function renderMainContacts() {
+    const el = document.getElementById('contacts-main-list');
+    const saved = JSON.parse(localStorage.getItem('shieldher_contacts') || '[]');
+    if (!saved.length) { el.innerHTML = '<p style="color:var(--muted);font-size:14px;margin-bottom:20px">No contacts yet. Add your first trusted contact below.</p>'; return; }
+    el.innerHTML = saved.map((c, i) => `
+      <div class="contact-item">
+        <div class="contact-avatar">${c.name[0].toUpperCase()}</div>
+        <div class="contact-info">
+          <div class="contact-name">${c.name}</div>
+          <div class="contact-phone">${c.phone}</div>
+        </div>
+        <button class="contact-remove" onclick="removeContact(${i}, false)">✕</button>
+      </div>
+    `).join('');
+  }
+
+  function addMainContact() {
+    const name = document.getElementById('main-contact-name').value.trim();
+    const phone = document.getElementById('main-contact-phone').value.trim();
+    if (!name || !phone) { showToast('⚠️ Enter both name and number'); return; }
+    const saved = JSON.parse(localStorage.getItem('shieldher_contacts') || '[]');
+    saved.push({ name, phone });
+    localStorage.setItem('shieldher_contacts', JSON.stringify(saved));
+    contacts = saved;
+    document.getElementById('main-contact-name').value = '';
+    document.getElementById('main-contact-phone').value = '';
+    renderMainContacts();
+    showToast(`✅ ${name} added`);
+  }
+
+  // ===== QR PAGE =====
+  function showQRPage() {
+    showScreen('qr-page');
+    const container = document.getElementById('qr-container');
+    container.innerHTML = '';
+    const url = window.location.href;
+    try {
+      new QRCode(container, {
+        text: url,
+        width: 220, height: 220,
+        colorDark: '#1a0a0a',
+        colorLight: '#ffffff',
+        correctLevel: QRCode.CorrectLevel.H
+      });
+    } catch(e) {
+      container.innerHTML = `<div style="padding:20px;color:#333;font-size:13px">QR Code: <br/><strong>${url}</strong></div>`;
+    }
+  }
+
+  // ===== MODALS =====
+  function closeModal(id) { document.getElementById(id).classList.remove('active'); }
+
+  // ===== TOAST =====
+  function showToast(msg) {
+    const t = document.getElementById('toast');
+    t.textContent = msg;
+    t.className = 'toast show';
+    setTimeout(() => { t.className = 'toast'; }, 2600);
+  }
+
+  // Close modals on overlay click
+  document.querySelectorAll('.modal-overlay').forEach(m => {
+    m.addEventListener('click', function(e) {
+      if (e.target === this) this.classList.remove('active');
+    });
+  });
+</script>
+</body>
+</html>
