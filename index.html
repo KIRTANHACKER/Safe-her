@@ -1019,6 +1019,9 @@
       if (e.target === this) this.classList.remove('active');
     });
   });
+  if ('serviceWorker' in navigator) {
+  navigator.serviceWorker.register('./sw.js');
+}
 </script>
 </body>
 </html>
